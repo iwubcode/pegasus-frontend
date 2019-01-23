@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "providers/Provider.h"
 #include "utils/FwdDeclModelData.h"
 #include "utils/HashMap.h"
 
@@ -35,9 +36,7 @@ class MetadataParser : public QObject {
 
 public:
     MetadataParser(QObject* parent);
-    void enhance(HashMap<QString, modeldata::Game>& games,
-                 const HashMap<QString, modeldata::Collection>& collections,
-                 const HashMap<QString, std::vector<QString>>& collection_childs,
+    void enhance(providers::SearchContext& sctx,
                  const HashMap<QString, QString>& collection_dirs);
 
 private:
@@ -46,10 +45,10 @@ private:
     const QRegularExpression m_players_regex;
 
     void parseGamelistFile(QXmlStreamReader&,
-                           HashMap<QString, modeldata::Game>&,
+                           providers::SearchContext&,
                            const QString&) const;
     void parseGameEntry(QXmlStreamReader&,
-                        HashMap<QString, modeldata::Game>&,
+                        providers::SearchContext&,
                         const QString&) const;
     void applyMetadata(modeldata::Game&,
                        HashMap<MetaTypes, QString, EnumHash>&) const;
