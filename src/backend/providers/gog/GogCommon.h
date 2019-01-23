@@ -23,6 +23,7 @@
 namespace providers {
 namespace gog {
 
+QString gog_tag();
 QString gog_id_key();
 QString json_api_suffix();
 QString json_embed_suffix();

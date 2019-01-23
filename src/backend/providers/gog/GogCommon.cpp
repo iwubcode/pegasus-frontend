@@ -21,6 +21,11 @@
 namespace providers {
 namespace gog {
 
+QString gog_tag()
+{
+    return QStringLiteral("GOG");
+}
+
 QString gog_id_key()
 {
     return QStringLiteral("gog.id");
