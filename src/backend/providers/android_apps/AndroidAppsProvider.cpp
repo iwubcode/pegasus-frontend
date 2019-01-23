@@ -32,9 +32,7 @@ AndroidAppsProvider::AndroidAppsProvider(QObject* parent)
     : Provider(parent)
 {}
 
-void AndroidAppsProvider::findLists(HashMap<QString, modeldata::Game>& games,
-                                    HashMap<QString, modeldata::Collection>& collections,
-                                    HashMap<QString, std::vector<QString>>& collection_childs)
+void AndroidAppsProvider::findLists(SearchContext& sctx)
 {
     static constexpr auto JNI_CLASS = "org/pegasus_frontend/android/MainActivity";
     static constexpr auto APPLIST_METHOD = "appList";
@@ -46,11 +44,11 @@ void AndroidAppsProvider::findLists(HashMap<QString, modeldata::Game>& games,
 
 
     const QString COLLECTION_TAG(QStringLiteral("Android"));
-    if (!collections.count(COLLECTION_TAG))
-        collections.emplace(COLLECTION_TAG, modeldata::Collection(COLLECTION_TAG));
+    if (!sctx.collections.count(COLLECTION_TAG))
+        sctx.collections.emplace(COLLECTION_TAG, modeldata::Collection(COLLECTION_TAG));
 
-    modeldata::Collection& collection = collections.at(COLLECTION_TAG);
-    std::vector<QString>& childs = collection_childs[COLLECTION_TAG];
+    modeldata::Collection& collection = sctx.collections.at(COLLECTION_TAG);
+    std::vector<size_t>& childs = sctx.collection_childs[COLLECTION_TAG];
     collection.setShortName(COLLECTION_TAG);
 
 
@@ -67,11 +65,15 @@ void AndroidAppsProvider::findLists(HashMap<QString, modeldata::Game>& games,
         const QString action = jni_app.callObjectMethod<jstring>(APP_LAUNCH_ACT).toString();
         const QString component = jni_app.callObjectMethod<jstring>(APP_LAUNCH_CPT).toString();
 
-        childs.emplace_back(package);
-        if (!games.count(package))
-            games.emplace(package, modeldata::Game(QFileInfo(package)));
+        if (!sctx.path_to_gameidx.count(package)) {
+            sctx.path_to_gameidx.emplace(package, sctx.games.size());
+            sctx.games.emplace_back(QFileInfo(package));
+        }
 
-        modeldata::Game& game = games.at(package);
+        const size_t game_idx = sctx.path_to_gameidx.at(package);
+        childs.emplace_back(game_idx);
+
+        modeldata::Game& game = sctx.games.at(game_idx);
         game.title = appname;
         game.launch_cmd = QStringLiteral("am start --user 0 -a %1 -n %2").arg(action, component);
 
@@ -80,11 +82,9 @@ void AndroidAppsProvider::findLists(HashMap<QString, modeldata::Game>& games,
     }
 }
 
-void AndroidAppsProvider::findStaticData(HashMap<QString, modeldata::Game>& games,
-                                         const HashMap<QString, modeldata::Collection>& collections,
-                                         const HashMap<QString, std::vector<QString>>& collection_childs)
+void AndroidAppsProvider::findStaticData(SearchContext& sctx)
 {
-    m_metadata.findStaticData(games, collections, collection_childs);
+    m_metadata.findStaticData(sctx);
 }
 
 } // namespace android

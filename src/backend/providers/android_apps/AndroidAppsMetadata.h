@@ -29,9 +29,7 @@ class Metadata {
 public:
     Metadata();
 
-    void findStaticData(HashMap<QString, modeldata::Game>&,
-                        const HashMap<QString, modeldata::Collection>&,
-                        const HashMap<QString, std::vector<QString>>&);
+    void findStaticData(SearchContext&);
 
 private:
     const QRegularExpression rx_meta_itemprops;
@@ -40,10 +38,8 @@ private:
     const QRegularExpression rx_category;
     const QRegularExpression rx_screenshots;
 
-    std::vector<QString> fill_from_cache(const std::vector<QString>&,
-                                         HashMap<QString, modeldata::Game>&);
-    void fill_from_network(const std::vector<QString>&,
-                           HashMap<QString, modeldata::Game>&);
+    std::vector<size_t> fill_from_cache(const std::vector<size_t>&, std::vector<modeldata::Game>&);
+    void fill_from_network(const std::vector<size_t>&, std::vector<modeldata::Game>&);
     bool parse_reply(QByteArray&, QJsonObject&);
 };
 
